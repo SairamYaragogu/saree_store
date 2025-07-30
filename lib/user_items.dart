@@ -45,8 +45,8 @@ class _UserItemsState extends State<UserItems> {
       ),
       body: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance
-            .collection('sarees')
-            .orderBy('timestamp', descending: true)
+            .collection('saree_items_2')
+            .orderBy('sno', descending: true)
             .snapshots(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
@@ -99,7 +99,7 @@ class _UserItemsState extends State<UserItems> {
                           Text('₹${saree['price'] ?? 'N/A'}', style: TextStyle(color: Colors.green[700])),
                           SizedBox(height: 10),
                           ElevatedButton.icon(
-                            onPressed: () => _launchWhatsApp(saree['whatsapp']),
+                            onPressed: () => _launchWhatsApp('9182600002'),
                             icon: Icon(Icons.chat),
                             label: Text('Chat on WhatsApp'),
                           ),
