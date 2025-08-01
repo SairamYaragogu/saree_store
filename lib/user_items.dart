@@ -24,8 +24,8 @@ class _UserItemsState extends State<UserItems> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-          title: Text('RK Collections'),
-          actions: [
+        title: Text('RK Collections'),
+        actions: [
           TextButton(
             onPressed: () {
               Navigator.push(
@@ -36,7 +36,7 @@ class _UserItemsState extends State<UserItems> {
             child: Text(
               'Admin Login',
               style: TextStyle(
-                color: Colors.black, // or Colors.white based on AppBar bg
+                color: Colors.black, // Adjust if AppBar background changes
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -45,7 +45,7 @@ class _UserItemsState extends State<UserItems> {
       ),
       body: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance
-            .collection('saree_items_2')
+            .collection('stock')
             .orderBy('sno', descending: true)
             .snapshots(),
         builder: (context, snapshot) {
@@ -53,60 +53,94 @@ class _UserItemsState extends State<UserItems> {
             return Center(child: CircularProgressIndicator());
           }
           if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-            return Center(child: Text('No sarees available'));
+            return Center(child: Text('No items available'));
           }
 
           final sarees = snapshot.data!.docs;
-          return ListView.builder(
+
+          return GridView.builder(
+            padding: EdgeInsets.all(8),
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2, // Two items per row
+              mainAxisSpacing: 8,
+              crossAxisSpacing: 8,
+              childAspectRatio: 0.65, // Adjust height/width ratio
+            ),
             itemCount: sarees.length,
             itemBuilder: (context, index) {
               final saree = sarees[index];
-              return Card(
-                margin: EdgeInsets.all(8),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                elevation: 3,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    if (saree['imageUrl'] != null && saree['imageUrl'].toString().isNotEmpty)
+
+              return GestureDetector(
+                onTap: () {
+                  // Optional: Navigate to detailed screen if required
+                },
+                child: Card(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  elevation: 3,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min, // 🔹 Avoid taking extra vertical space
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // 🔹 Product Image
                       ClipRRect(
                         borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
-                        child: Image.network(
+                        child: saree['imageUrl'] != null &&
+                            saree['imageUrl'].toString().isNotEmpty
+                            ? Image.network(
                           saree['imageUrl'],
-                          height: 200,
+                          height: 140,
                           width: double.infinity,
                           fit: BoxFit.cover,
                           errorBuilder: (context, error, stackTrace) => Container(
-                            height: 200,
+                            height: 140,
                             color: Colors.grey[300],
                             alignment: Alignment.center,
                             child: Icon(Icons.broken_image, size: 50),
                           ),
+                        )
+                            : Container(
+                          height: 140,
+                          color: Colors.grey[300],
+                          alignment: Alignment.center,
+                          child: Icon(Icons.image, size: 50),
                         ),
                       ),
-                    Padding(
-                      padding: const EdgeInsets.all(12.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            saree['title'] ?? '',
-                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                          ),
-                          SizedBox(height: 6),
-                          Text(saree['description'] ?? ''),
-                          SizedBox(height: 6),
-                          Text('₹${saree['price'] ?? 'N/A'}', style: TextStyle(color: Colors.green[700])),
-                          SizedBox(height: 10),
-                          ElevatedButton.icon(
-                            onPressed: () => _launchWhatsApp('9182600002'),
-                            icon: Icon(Icons.chat),
-                            label: Text('Chat on WhatsApp'),
-                          ),
-                        ],
+
+                      // 🔹 Product Info
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min, // 🔹 Shrink wrap content
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              saree['title'] ?? '',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            SizedBox(height: 4),
+                            Text(saree['description'] ?? ''),
+                            SizedBox(height: 4),
+                            Text(
+                              '₹${saree['price'] ?? 'N/A'}',
+                              style: TextStyle(
+                                color: Colors.green[700],
+                                fontWeight: FontWeight.bold,
+                                fontSize: 13,
+                              ),
+                            ),
+                            SizedBox(height: 6),
+                          ],
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               );
             },
