@@ -61,12 +61,12 @@ class _UserItemsState extends State<UserItems> {
           final sarees = snapshot.data!.docs;
 
           return GridView.builder(
-            padding: EdgeInsets.all(8),
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: crossAxisCount,
-              mainAxisSpacing: 8,
-              crossAxisSpacing: 8,
-              childAspectRatio: 0.72, // 🔹 Adjust to your content height
+            padding: const EdgeInsets.all(8),
+            gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+              maxCrossAxisExtent: 250, // 🔹 Max width per item
+              mainAxisSpacing: 12,
+              crossAxisSpacing: 12,
+              mainAxisExtent: 240, // 🔹 Fixed card height instead of aspect ratio
             ),
             itemCount: sarees.length,
             itemBuilder: (context, index) {
@@ -83,27 +83,27 @@ class _UserItemsState extends State<UserItems> {
                   children: [
                     // 🔹 Product Image
                     ClipRRect(
-                      borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
+                      borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
                       child: saree['imageUrl'] != null &&
                           saree['imageUrl'].toString().isNotEmpty
                           ? Image.network(
                         saree['imageUrl'],
-                        height: 140,
+                        height: 120,
                         width: double.infinity,
                         fit: BoxFit.cover,
                         errorBuilder: (context, error, stackTrace) =>
                             Container(
-                              height: 140,
+                              height: 120,
                               color: Colors.grey[300],
                               alignment: Alignment.center,
-                              child: Icon(Icons.broken_image, size: 50),
+                              child: const Icon(Icons.broken_image, size: 50),
                             ),
                       )
                           : Container(
-                        height: 140,
+                        height: 120,
                         color: Colors.grey[300],
                         alignment: Alignment.center,
-                        child: Icon(Icons.image, size: 50),
+                        child: const Icon(Icons.image, size: 50),
                       ),
                     ),
 
@@ -117,19 +117,19 @@ class _UserItemsState extends State<UserItems> {
                             saree['title'] ?? '',
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
+                            style: const TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
-                          SizedBox(height: 4),
+                          const SizedBox(height: 4),
                           Text(
                             saree['description'] ?? '',
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
-                            style: TextStyle(fontSize: 12, color: Colors.black54),
+                            style: const TextStyle(fontSize: 12, color: Colors.black54),
                           ),
-                          SizedBox(height: 4),
+                          const SizedBox(height: 4),
                           Text(
                             '₹${saree['price'] ?? 'N/A'}',
                             style: TextStyle(
