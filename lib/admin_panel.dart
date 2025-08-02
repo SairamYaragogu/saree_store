@@ -65,13 +65,15 @@ class _AdminPanelState extends State<AdminPanel> {
       final row = rowsAsListOfValues[i];
 
       final sno = row[0].toString().trim();
-      final title = row[1].toString().trim();
-      final description = row[2].toString().trim();
-      final price = double.tryParse(row[3].toString()) ?? 0.0;
-      final imageUrl = row[4].toString().trim();
+      final category = row[1].toString().trim();
+      final title = row[2].toString().trim();
+      final description = row[3].toString().trim();
+      final price = double.tryParse(row[4].toString()) ?? 0.0;
+      final imageUrl = row[5].toString().trim();
 
       await FirebaseFirestore.instance.collection('stock').add({
         'sno': sno,
+        'category': category,
         'title': title,
         'description': description,
         'price': price,
