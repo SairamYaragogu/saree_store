@@ -64,7 +64,7 @@ class _AdminPanelState extends State<AdminPanel> {
     for (int i = 1; i < rowsAsListOfValues.length; i++) {
       final row = rowsAsListOfValues[i];
 
-      final sno = row[0].toString().trim();
+      final sno = int.tryParse(row[0].toString().trim()) ?? 0;
       final category = row[1].toString().trim();
       final title = row[2].toString().trim();
       final description = row[3].toString().trim();
