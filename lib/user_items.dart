@@ -10,8 +10,12 @@ class UserItems extends StatefulWidget {
 
 class _UserItemsState extends State<UserItems> with SingleTickerProviderStateMixin {
   String selectedCategory = "All";
+  String selectedSubcategory = "All";
+
   List<String> categories = ["All"];
-  int fadeKey = 0; // 🔹 To trigger fade animation on category change
+  List<String> subcategories = ["All"];
+
+  int fadeKey = 0;
 
   @override
   void initState() {
@@ -34,6 +38,33 @@ class _UserItemsState extends State<UserItems> with SingleTickerProviderStateMix
     });
   }
 
+  /// 🔹 Fetch unique subcategories for selected category
+  Future<void> fetchSubcategories(String category) async {
+    if (category == "All") {
+      setState(() {
+        subcategories = ["All"];
+        selectedSubcategory = "All";
+      });
+      return;
+    }
+
+    final snapshot = await FirebaseFirestore.instance
+        .collection('stock')
+        .where('category', isEqualTo: category)
+        .get();
+
+    final uniqueSubcategories = snapshot.docs
+        .map((doc) => doc['subcategory']?.toString() ?? "")
+        .where((s) => s.isNotEmpty)
+        .toSet()
+        .toList();
+
+    setState(() {
+      subcategories = ["All", ...uniqueSubcategories];
+      selectedSubcategory = "All";
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
@@ -49,6 +80,19 @@ class _UserItemsState extends State<UserItems> with SingleTickerProviderStateMix
     } else {
       crossAxisCount = 5; // Very large desktop
     }
+
+    // 🔹 Build Firestore query
+    Query query = FirebaseFirestore.instance.collection('stock');
+    if (selectedCategory != "All") {
+      query = query.where('category', isEqualTo: selectedCategory);
+    }
+    if (selectedCategory != "All" && selectedSubcategory != "All") {
+      query = query.where('subcategory', isEqualTo: selectedSubcategory);
+    }
+    query = query.orderBy('sno', descending: true);
+
+    // 🔹 Check if any filter is applied
+    bool isFilterActive = selectedCategory != "All" || selectedSubcategory != "All";
 
     return Scaffold(
       appBar: AppBar(
@@ -73,7 +117,7 @@ class _UserItemsState extends State<UserItems> with SingleTickerProviderStateMix
       ),
       body: Column(
         children: [
-          // 🔹 Animated Horizontal Category Chips
+          // 🔹 Category Chips with Auto-Hiding Clear Filter
           Container(
             height: 60,
             alignment: Alignment.centerLeft,
@@ -81,18 +125,55 @@ class _UserItemsState extends State<UserItems> with SingleTickerProviderStateMix
             child: ListView.separated(
               scrollDirection: Axis.horizontal,
               padding: const EdgeInsets.symmetric(horizontal: 8),
-              itemCount: categories.length,
+              itemCount: categories.length + (isFilterActive ? 1 : 0),
               separatorBuilder: (_, __) => const SizedBox(width: 8),
               itemBuilder: (context, index) {
-                final category = categories[index];
+                if (isFilterActive && index == 0) {
+                  // 🔹 Clear Filters chip
+                  return GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        selectedCategory = "All";
+                        selectedSubcategory = "All";
+                        subcategories = ["All"];
+                        fadeKey++;
+                      });
+                    },
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 250),
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: Colors.red,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Row(
+                        children: const [
+                          Icon(Icons.clear, color: Colors.white, size: 16),
+                          SizedBox(width: 4),
+                          Text(
+                            'Clear Filters',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 13,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                }
+
+                final category = categories[index - (isFilterActive ? 1 : 0)];
                 final isSelected = selectedCategory == category;
 
                 return GestureDetector(
-                  onTap: () {
+                  onTap: () async {
                     setState(() {
                       selectedCategory = category;
-                      fadeKey++; // 🔹 Trigger fade animation for grid
+                      fadeKey++; // Trigger fade animation
                     });
+                    await fetchSubcategories(category);
                   },
                   child: AnimatedContainer(
                     duration: const Duration(milliseconds: 250),
@@ -126,19 +207,64 @@ class _UserItemsState extends State<UserItems> with SingleTickerProviderStateMix
             ),
           ),
 
+          // 🔹 Subcategory Chips
+          if (selectedCategory != "All" && subcategories.length > 1)
+            Container(
+              height: 50,
+              alignment: Alignment.centerLeft,
+              padding: const EdgeInsets.symmetric(vertical: 6),
+              child: ListView.separated(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                itemCount: subcategories.length,
+                separatorBuilder: (_, __) => const SizedBox(width: 8),
+                itemBuilder: (context, index) {
+                  final subcategory = subcategories[index];
+                  final isSelected = selectedSubcategory == subcategory;
+
+                  return GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        selectedSubcategory = subcategory;
+                        fadeKey++; // Trigger fade animation
+                      });
+                    },
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 250),
+                      curve: Curves.easeInOut,
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: isSelected ? Colors.orange : Colors.grey[200],
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: isSelected
+                            ? [
+                          BoxShadow(
+                            color: Colors.orange.withOpacity(0.4),
+                            blurRadius: 8,
+                            offset: const Offset(0, 3),
+                          )
+                        ]
+                            : [],
+                      ),
+                      child: AnimatedDefaultTextStyle(
+                        duration: const Duration(milliseconds: 200),
+                        style: TextStyle(
+                          color: isSelected ? Colors.white : Colors.black87,
+                          fontWeight: FontWeight.w500,
+                          fontSize: isSelected ? 14 : 13,
+                        ),
+                        child: Text(subcategory),
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+
           // 🔹 Items Grid with Fade Animation
           Expanded(
             child: StreamBuilder<QuerySnapshot>(
-              stream: (selectedCategory == "All")
-                  ? FirebaseFirestore.instance
-                  .collection('stock')
-                  .orderBy('sno', descending: true)
-                  .snapshots()
-                  : FirebaseFirestore.instance
-                  .collection('stock')
-                  .where('category', isEqualTo: selectedCategory)
-                  .orderBy('sno', descending: true)
-                  .snapshots(),
+              stream: query.snapshots(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
@@ -153,16 +279,15 @@ class _UserItemsState extends State<UserItems> with SingleTickerProviderStateMix
                   duration: const Duration(milliseconds: 400),
                   switchInCurve: Curves.easeIn,
                   switchOutCurve: Curves.easeOut,
-                  key: ValueKey(fadeKey), // 🔹 Trigger rebuild for fade
+                  key: ValueKey(fadeKey),
                   child: GridView.builder(
-                    key: ValueKey(selectedCategory), // 🔹 Unique key for fade effect
+                    key: ValueKey(selectedCategory + selectedSubcategory),
                     padding: const EdgeInsets.all(8),
-                    gridDelegate:
-                    const SliverGridDelegateWithMaxCrossAxisExtent(
-                      maxCrossAxisExtent: 250, // 🔹 Max width per item
+                    gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                      maxCrossAxisExtent: 250,
                       mainAxisSpacing: 12,
                       crossAxisSpacing: 12,
-                      mainAxisExtent: 240, // 🔹 Fixed card height
+                      mainAxisExtent: 240,
                     ),
                     itemCount: items.length,
                     itemBuilder: (context, index) {
@@ -179,31 +304,25 @@ class _UserItemsState extends State<UserItems> with SingleTickerProviderStateMix
                           children: [
                             // 🔹 Product Image
                             ClipRRect(
-                              borderRadius: const BorderRadius.vertical(
-                                  top: Radius.circular(12)),
-                              child: item['imageUrl'] != null &&
-                                  item['imageUrl'].toString().isNotEmpty
+                              borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+                              child: item['imageUrl'] != null && item['imageUrl'].toString().isNotEmpty
                                   ? Image.network(
                                 item['imageUrl'],
                                 height: 120,
                                 width: double.infinity,
                                 fit: BoxFit.cover,
-                                errorBuilder:
-                                    (context, error, stackTrace) =>
-                                    Container(
-                                      height: 120,
-                                      color: Colors.grey[300],
-                                      alignment: Alignment.center,
-                                      child: const Icon(Icons.broken_image,
-                                          size: 50),
-                                    ),
+                                errorBuilder: (context, error, stackTrace) => Container(
+                                  height: 120,
+                                  color: Colors.grey[300],
+                                  alignment: Alignment.center,
+                                  child: const Icon(Icons.broken_image, size: 50),
+                                ),
                               )
                                   : Container(
                                 height: 120,
                                 color: Colors.grey[300],
                                 alignment: Alignment.center,
-                                child:
-                                const Icon(Icons.image, size: 50),
+                                child: const Icon(Icons.image, size: 50),
                               ),
                             ),
 
@@ -227,9 +346,7 @@ class _UserItemsState extends State<UserItems> with SingleTickerProviderStateMix
                                     item['description'] ?? '',
                                     maxLines: 2,
                                     overflow: TextOverflow.ellipsis,
-                                    style: const TextStyle(
-                                        fontSize: 12,
-                                        color: Colors.black54),
+                                    style: const TextStyle(fontSize: 12, color: Colors.black54),
                                   ),
                                   const SizedBox(height: 4),
                                   Text(
