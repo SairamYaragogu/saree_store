@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:saree_business/admin_login.dart';
+import 'package:saree_business/product_details.dart';
 
 
 class UserItems extends StatefulWidget {
@@ -96,7 +97,7 @@ class _UserItemsState extends State<UserItems> with SingleTickerProviderStateMix
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('RK Collections'),
+        title: const Text('Akki Collections'),
         actions: [
           TextButton(
             onPressed: () {
@@ -291,78 +292,90 @@ class _UserItemsState extends State<UserItems> with SingleTickerProviderStateMix
                     ),
                     itemCount: items.length,
                     itemBuilder: (context, index) {
-                      final item = items[index];
+                      final doc = items[index];
+                      final item = doc.data() as Map<String, dynamic>; // Convert Firestore doc to Map
 
-                      return Card(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        elevation: 3,
-                        clipBehavior: Clip.hardEdge,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            // 🔹 Product Image
-                            ClipRRect(
-                              borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-                              child: item['imageUrl'] != null && item['imageUrl'].toString().isNotEmpty
-                                  ? Image.network(
-                                item['imageUrl'],
-                                height: 120,
-                                width: double.infinity,
-                                fit: BoxFit.cover,
-                                errorBuilder: (context, error, stackTrace) => Container(
+                      return GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => ProductDetailsScreen(product: Map<String, dynamic>.from(item)),
+                            ),
+                          );
+                        },
+                        child: Card(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          elevation: 3,
+                          clipBehavior: Clip.hardEdge,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              // 🔹 Product Image
+                              ClipRRect(
+                                borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+                                child: item['imageUrls'] != null && (item['imageUrls'] as List).isNotEmpty
+                                    ? Image.network(
+                                  item['imageUrls'][0],
+                                  height: 120,
+                                  width: double.infinity,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) => Container(
+                                    height: 120,
+                                    color: Colors.grey[300],
+                                    alignment: Alignment.center,
+                                    child: const Icon(Icons.broken_image, size: 50),
+                                  ),
+                                )
+                                    : Container(
                                   height: 120,
                                   color: Colors.grey[300],
                                   alignment: Alignment.center,
-                                  child: const Icon(Icons.broken_image, size: 50),
+                                  child: const Icon(Icons.image, size: 50),
                                 ),
-                              )
-                                  : Container(
-                                height: 120,
-                                color: Colors.grey[300],
-                                alignment: Alignment.center,
-                                child: const Icon(Icons.image, size: 50),
                               ),
-                            ),
 
-                            // 🔹 Product Info
-                            Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    item['title'] ?? '',
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: const TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.bold,
+                              // 🔹 Product Info
+                              Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      item['title'] ?? '',
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: const TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.bold,
+                                      ),
                                     ),
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    item['description'] ?? '',
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: const TextStyle(fontSize: 12, color: Colors.black54),
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    '₹${item['price'] ?? 'N/A'}',
-                                    style: TextStyle(
-                                      color: Colors.green[700],
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 13,
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      item['description'] ?? '',
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: const TextStyle(fontSize: 12, color: Colors.black54),
                                     ),
-                                  ),
-                                ],
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      '₹${item['price'] ?? 'N/A'}',
+                                      style: TextStyle(
+                                        color: Colors.green[700],
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 13,
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       );
+
                     },
                   ),
                 );

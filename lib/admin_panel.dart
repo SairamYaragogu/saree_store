@@ -70,7 +70,18 @@ class _AdminPanelState extends State<AdminPanel> {
       final title = row[3].toString().trim();
       final description = row[4].toString().trim();
       final price = double.tryParse(row[5].toString()) ?? 0.0;
-      final imageUrl = row[6].toString().trim();
+
+      // 🔹 Extract all image URLs from column 6 onwards
+      final imageUrls = row[6]
+          .toString()
+          .split(',')
+          .map((url) => url
+            .trim()
+            .replaceAll('\n', '')
+            .replaceAll('\r', '')
+            .replaceAll('\t', ''))
+          .where((url) => url.isNotEmpty)
+          .toList();
 
       await FirebaseFirestore.instance.collection('stock').add({
         'sno': sno,
@@ -79,7 +90,7 @@ class _AdminPanelState extends State<AdminPanel> {
         'title': title,
         'description': description,
         'price': price,
-        'imageUrl': imageUrl,
+        'imageUrls': imageUrls,
       });
     }
   }
