@@ -60,17 +60,17 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen>
     const adminNumber = '918179349591';
 
     final message = '''
-----------------------------------------
-Hi I'm interested in this :
+Hi, I'm interested in the following product:
 
-Product: *$title*
+🛍️ Product: *$title*
 
-Description: $description
+📝 Description: $description
 
-Price: *$price*
+💰 Price: *$price*
 
-Please contact me to proceed further steps
-----------------------------------------''';
+Kindly contact me to proceed with the next steps.
+
+Thank you!''';
 
     final encodedMessage = Uri.encodeComponent(message);
 
@@ -216,14 +216,14 @@ Please contact me to proceed further steps
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(title,
-            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
         const SizedBox(height: 12),
         Text(description,
-            style: TextStyle(fontSize: 16, color: Colors.grey[700])),
+            style: TextStyle(fontSize: 14, color: Colors.grey[700])),
         const SizedBox(height: 16),
         Text('₹ $price',
             style: const TextStyle(
-                fontSize: 26, fontWeight: FontWeight.bold, color: Colors.green)),
+                fontSize: 20, fontWeight: FontWeight.bold, color: Colors.green)),
         const SizedBox(height: 20),
 
         // 🔹 WhatsApp button
@@ -248,10 +248,20 @@ Please contact me to proceed further steps
     );
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(title),
-        backgroundColor: Colors.deepOrangeAccent,
-      ),
+        appBar: AppBar(
+          title: Text(
+            title,
+            style: const TextStyle(
+              color: Colors.white,      // 🔹 Title text color
+              fontSize: 18,             // 🔹 Reduce text size
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          backgroundColor: Colors.deepOrangeAccent,
+          iconTheme: const IconThemeData(
+            color: Colors.white,        // 🔹 Back arrow color
+          ),
+        ),
       body: isLargeScreen
           ? Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -334,7 +344,7 @@ Please contact me to proceed further steps
               ),
             ),
 
-            const SizedBox(height: 12),
+            const SizedBox(height: 5),
             _buildHorizontalThumbnails(imageUrls),
 
             const SizedBox(height: 16),
