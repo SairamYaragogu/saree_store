@@ -1,4 +1,7 @@
+import 'dart:io' show Platform;
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class ProductDetailsScreen extends StatefulWidget {
   final Map<String, dynamic> product;
@@ -51,6 +54,48 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen>
         _scale = _animation.value;
       });
     });
+  }
+
+  Future<void> _openWhatsApp(BuildContext context, String title, String description, String price) async {
+    const adminNumber = '918179349591';
+
+    final message = '''
+----------------------------------------
+Hi I'm interested in this :
+
+Product: *$title*
+
+Description: $description
+
+Price: *$price*
+
+Please contact me to proceed further steps
+----------------------------------------''';
+
+    final encodedMessage = Uri.encodeComponent(message);
+
+    final url = 'https://wa.me/$adminNumber?text=$encodedMessage';
+    final uri = Uri.parse(url);
+
+    try {
+      final launched = await launchUrl(
+        uri,
+        mode: LaunchMode.externalApplication,
+      );
+
+      if (!launched) {
+        _showWhatsAppError(context);
+      }
+    } catch (e) {
+      debugPrint("WhatsApp launch failed: $e");
+      _showWhatsAppError(context);
+    }
+  }
+
+  void _showWhatsAppError(BuildContext context) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Could not open WhatsApp. Please ensure it is installed.')),
+    );
   }
 
   /// 🔹 Main Image with pinch & animated double-tap zoom
@@ -167,6 +212,41 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen>
 
     final isLargeScreen = MediaQuery.of(context).size.width > 800;
 
+    final productDetailsSection = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(title,
+            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+        const SizedBox(height: 12),
+        Text(description,
+            style: TextStyle(fontSize: 16, color: Colors.grey[700])),
+        const SizedBox(height: 16),
+        Text('₹ $price',
+            style: const TextStyle(
+                fontSize: 26, fontWeight: FontWeight.bold, color: Colors.green)),
+        const SizedBox(height: 20),
+
+        // 🔹 WhatsApp button
+        ElevatedButton.icon(
+          onPressed: () => _openWhatsApp(context, title, description, price),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.green,
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+            shape:
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          ),
+          icon: Image.asset(
+            'assets/icons/whatsapp.png',
+            height: 24,
+            width: 24,
+          ),
+          label: const Text("Chat on WhatsApp",
+              style: TextStyle(color: Colors.white, fontSize: 16)),
+        ),
+        const SizedBox(height: 50),
+      ],
+    );
+
     return Scaffold(
       appBar: AppBar(
         title: Text(title),
@@ -200,9 +280,11 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen>
                           },
                           itemBuilder: (context, index) {
                             return AnimatedSwitcher(
-                              duration: const Duration(milliseconds: 400),
+                              duration:
+                              const Duration(milliseconds: 400),
                               transitionBuilder: (child, anim) =>
-                                  FadeTransition(opacity: anim, child: child),
+                                  FadeTransition(
+                                      opacity: anim, child: child),
                               child: _buildMainImage(imageUrls[index]),
                             );
                           },
@@ -215,29 +297,12 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen>
             ),
           ),
 
-          // 🔹 Right side (product details)
+          // 🔹 Right side (product details + WhatsApp)
           Expanded(
             flex: 3,
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(title,
-                      style: const TextStyle(
-                          fontSize: 24, fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 12),
-                  Text(description,
-                      style: TextStyle(
-                          fontSize: 16, color: Colors.grey[700])),
-                  const SizedBox(height: 16),
-                  Text('₹ $price',
-                      style: const TextStyle(
-                          fontSize: 26,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.green)),
-                ],
-              ),
+              child: productDetailsSection,
             ),
           ),
         ],
@@ -275,24 +340,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen>
             const SizedBox(height: 16),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(title,
-                      style: const TextStyle(
-                          fontSize: 20, fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 8),
-                  Text(description,
-                      style: TextStyle(
-                          fontSize: 16, color: Colors.grey[700])),
-                  const SizedBox(height: 12),
-                  Text('₹ $price',
-                      style: const TextStyle(
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.green)),
-                ],
-              ),
+              child: productDetailsSection,
             ),
           ],
         ),
