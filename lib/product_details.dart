@@ -1,6 +1,7 @@
 import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
+import 'package:saree_business/image_zoom_gallery.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class ProductDetailsScreen extends StatefulWidget {
@@ -104,23 +105,31 @@ Thank you!''';
       onDoubleTap: _handleDoubleTap,
       child: Container(
         color: Colors.black12,
-        child: InteractiveViewer(
-          panEnabled: true,
-          minScale: 0.8,
-          maxScale: 4.0, // Pinch zoom max
-          child: Transform.scale(
-            scale: _scale,
-            alignment: Alignment.center,
-            child: Image.network(
-              url,
-              fit: BoxFit.contain,
-              width: double.infinity,
-              loadingBuilder: (context, child, progress) {
-                if (progress == null) return child;
-                return const Center(child: CircularProgressIndicator());
-              },
-              errorBuilder: (_, __, ___) =>
-              const Center(child: Icon(Icons.broken_image, size: 50)),
+        padding: const EdgeInsets.all(8.0),
+        child: Container(
+          decoration: BoxDecoration(
+            border: Border.all(color: Colors.deepOrangeAccent, width: 2),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(12),
+            child: InteractiveViewer(
+              panEnabled: true,
+              scaleEnabled: true,
+              minScale: 1.0,
+              maxScale: 4.0,
+              child: Image.network(
+                url,
+                fit: BoxFit.cover,
+                width: double.infinity,
+                height: double.infinity,
+                loadingBuilder: (context, child, progress) {
+                  if (progress == null) return child;
+                  return const Center(child: CircularProgressIndicator());
+                },
+                errorBuilder: (_, __, ___) =>
+                const Center(child: Icon(Icons.broken_image, size: 50)),
+              ),
             ),
           ),
         ),
@@ -295,7 +304,13 @@ Thank you!''';
                               transitionBuilder: (child, anim) =>
                                   FadeTransition(
                                       opacity: anim, child: child),
-                              child: _buildMainImage(imageUrls[index]),
+                              //child: _buildMainImage(imageUrls[index]),
+                              child: kIsWeb
+                                  ? _buildMainImage(imageUrls[index]) // For Web (browser or mobile web)
+                                  : ImageZoomGallery(
+                                imageUrls: imageUrls,
+                                initialIndex: index,
+                              ), // For Android/iOS
                             );
                           },
                         ),
@@ -338,7 +353,13 @@ Thank you!''';
                     duration: const Duration(milliseconds: 400),
                     transitionBuilder: (child, anim) =>
                         FadeTransition(opacity: anim, child: child),
-                    child: _buildMainImage(imageUrls[index]),
+                    //child: ImageZoomGallery(imageUrls: imageUrls, initialIndex: index),
+                    child: kIsWeb
+                        ? _buildMainImage(imageUrls[index]) // For Web (browser or mobile web)
+                        : ImageZoomGallery(
+                      imageUrls: imageUrls,
+                      initialIndex: index,
+                    ), // For Android/iOS
                   );
                 },
               ),
