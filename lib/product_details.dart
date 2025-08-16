@@ -57,7 +57,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen>
     });
   }
 
-  Future<void> _openWhatsApp(BuildContext context, String title, String description, String price) async {
+  Future<void> _openWhatsApp(BuildContext context, String title, String description, String price, String imageUrl) async {
     const adminNumber = '918179349591';
 
     final message = '''
@@ -68,6 +68,8 @@ Hi, I'm interested in the following product:
 📝 Description: $description
 
 💰 Price: *$price*
+
+🖼️ Product Image: $imageUrl
 
 Kindly contact me to proceed with the next steps.
 
@@ -237,7 +239,7 @@ Thank you!''';
 
         // 🔹 WhatsApp button
         ElevatedButton.icon(
-          onPressed: () => _openWhatsApp(context, title, description, price),
+          onPressed: () => _openWhatsApp(context, title, description, price, imageUrls[0]),
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.green,
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
