@@ -37,38 +37,126 @@ class _AdminLoginState extends State<AdminLogin> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Admin Login')),
-      body: Center(
-        child: SizedBox(
-          width: 300,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              TextField(
-                controller: usernameController,
-                decoration: InputDecoration(labelText: 'Username'),
+      backgroundColor: Colors.grey[100],
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            // Header with gradient + back button
+            Container(
+              height: 200,
+              width: double.infinity,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [Colors.orangeAccent, Colors.deepOrange],
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                ),
+                borderRadius: BorderRadius.vertical(
+                  bottom: Radius.circular(30),
+                ),
               ),
-              TextField(
-                controller: passwordController,
-                decoration: InputDecoration(labelText: 'Password'),
-                obscureText: true,
+              child: SafeArea(
+                child: Stack(
+                  children: [
+                    Positioned(
+                      left: 8,
+                      top: 8,
+                      child: IconButton(
+                        icon: Icon(Icons.arrow_back, color: Colors.white, size: 28),
+                        onPressed: () => Navigator.pop(context),
+                      ),
+                    ),
+                    Center(
+                      child: Text(
+                        "Admin Login",
+                        style: TextStyle(
+                          fontSize: 28,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
-              SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: login,
-                child: Text('Login'),
+            ),
+
+            // Form Card
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 30),
+              child: Card(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                elevation: 8,
+                child: Padding(
+                  padding: const EdgeInsets.all(24.0),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      TextField(
+                        controller: usernameController,
+                        decoration: InputDecoration(
+                          prefixIcon: Icon(Icons.person),
+                          labelText: 'Username',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                      ),
+                      SizedBox(height: 20),
+                      TextField(
+                        controller: passwordController,
+                        obscureText: true,
+                        decoration: InputDecoration(
+                          prefixIcon: Icon(Icons.lock),
+                          labelText: 'Password',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                      ),
+                      SizedBox(height: 30),
+                      SizedBox(
+                        width: double.infinity,
+                        height: 50,
+                        child: ElevatedButton(
+                          onPressed: login,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.deepOrange,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          child: const Text(
+                            'Login',
+                            style: TextStyle(
+                              fontSize: 18,
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      TextButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (_) => UserItems()),
+                          );
+                        },
+                        child: Text(
+                          'Continue as User',
+                          style: TextStyle(fontSize: 16),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
-              TextButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => UserItems()),
-                  );
-                },
-                child: Text('Continue as User'),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

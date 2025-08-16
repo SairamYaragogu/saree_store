@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:saree_business/splash_screen.dart';
 import 'package:saree_business/user_items.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -28,8 +29,18 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Saree Store',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(primarySwatch: Colors.pink),
-      home: UserItems(),
+      theme: ThemeData(
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Colors.orange,
+          foregroundColor: Colors.white, // Applies globally
+          centerTitle: true,
+        ),
+      ),
+      initialRoute: '/',
+      routes: {
+        '/': (context) => SplashScreen(),
+        '/home': (context) => UserItems(),
+      },
     );
   }
 }

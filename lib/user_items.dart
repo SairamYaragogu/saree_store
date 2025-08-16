@@ -97,7 +97,9 @@ class _UserItemsState extends State<UserItems> with SingleTickerProviderStateMix
 
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         title: const Text('Akki Collections'),
+        centerTitle: MediaQuery.of(context).size.width > 600,
         actions: [
           TextButton(
             onPressed: () {
@@ -109,7 +111,7 @@ class _UserItemsState extends State<UserItems> with SingleTickerProviderStateMix
             child: const Text(
               'Admin Login',
               style: TextStyle(
-                color: Colors.black,
+                color: Colors.white,
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -235,12 +237,12 @@ class _UserItemsState extends State<UserItems> with SingleTickerProviderStateMix
                       curve: Curves.easeInOut,
                       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
                       decoration: BoxDecoration(
-                        color: isSelected ? Colors.orange : Colors.grey[200],
+                        color: isSelected ? Colors.green : Colors.grey[200],
                         borderRadius: BorderRadius.circular(20),
                         boxShadow: isSelected
                             ? [
                           BoxShadow(
-                            color: Colors.orange.withOpacity(0.4),
+                            color: Colors.green.withOpacity(0.4),
                             blurRadius: 8,
                             offset: const Offset(0, 3),
                           )
