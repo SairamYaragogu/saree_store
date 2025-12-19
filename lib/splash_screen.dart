@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
 
+import 'package:google_fonts/google_fonts.dart';
+
 class SplashScreen extends StatefulWidget {
   @override
   _SplashScreenState createState() => _SplashScreenState();
@@ -60,17 +62,32 @@ class _SplashScreenState extends State<SplashScreen>
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Image.asset(
-                  'assets/icons/akki_collections.png',
-                  width: 150,
-                  height: 150,
+                  'assets/icons/logo_akki_latest_collections.jpeg',
+                  width: 500,
+                  height: 300,
                 ),
                 const SizedBox(height: 20),
-                const Text(
-                  "Akki Collections",
-                  style: TextStyle(
-                    fontSize: 26,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.deepOrangeAccent,
+                RichText(
+                  text: TextSpan(
+                    children: [
+                      TextSpan(
+                        text: "Akki ",
+                        style: GoogleFonts.playfairDisplay(
+                          fontSize: 28,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 1.5,
+                          color: Colors.deepOrangeAccent,
+                        ),
+                      ),
+                      TextSpan(
+                        text: "Latest Collections",
+                        style: GoogleFonts.poppins(
+                          fontSize: 24,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.black87,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],

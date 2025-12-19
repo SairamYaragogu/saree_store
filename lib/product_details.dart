@@ -58,7 +58,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen>
   }
 
   Future<void> _openWhatsApp(BuildContext context, String title, String description, String price, String imageUrl) async {
-    const adminNumber = '918179349591';
+    const adminNumber = '8247025557';
 
     final message = '''
 Hi, I'm interested in the following product:
@@ -122,7 +122,7 @@ Thank you!''';
               maxScale: 4.0,
               child: Image.network(
                 url,
-                fit: BoxFit.cover,
+                fit: BoxFit.fill,
                 width: double.infinity,
                 height: double.infinity,
                 loadingBuilder: (context, child, progress) {
@@ -239,7 +239,7 @@ Thank you!''';
 
         // 🔹 WhatsApp button
         ElevatedButton.icon(
-          onPressed: () => _openWhatsApp(context, title, description, price, imageUrls[0]),
+          onPressed: () => _openWhatsApp(context, title, description, price, imageUrls[_currentIndex]),
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.green,
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
@@ -340,7 +340,7 @@ Thank you!''';
           children: [
             // 🔹 Main Image
             SizedBox(
-              height: 350,
+              height: 500,
               child: PageView.builder(
                 controller: _pageController,
                 itemCount: imageUrls.length,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:saree_business/admin_login.dart';
 import 'package:saree_business/product_details.dart';
 
@@ -98,7 +99,29 @@ class _UserItemsState extends State<UserItems> with SingleTickerProviderStateMix
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        title: const Text('Akki Collections'),
+        title: RichText(
+          text: TextSpan(
+            children: [
+              TextSpan(
+                text: "Akki ",
+                style: GoogleFonts.playfairDisplay(
+                  fontSize: 26,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 1.5,
+                  color: Colors.white,
+                ),
+              ),
+              TextSpan(
+                text: "Latest Collections",
+                style: GoogleFonts.poppins(
+                  fontSize: 22,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.black87,
+                ),
+              ),
+            ],
+          ),
+        ),
         centerTitle: MediaQuery.of(context).size.width > 600,
         actions: [
           TextButton(
