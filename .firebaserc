@@ -1,5 +1,8 @@
 {
   "projects": {
-    "default": "sareebusiness-b14b1"
-  }
+    "default": "sareebusiness-b14b1",
+    "prod": "akki-latest-collections"
+  },
+  "targets": {},
+  "etags": {}
 }
