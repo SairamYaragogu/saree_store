@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:csv/csv.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/services.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class AdminPanel extends StatefulWidget {
   const AdminPanel({Key? key}) : super(key: key);
@@ -14,6 +16,52 @@ class AdminPanel extends StatefulWidget {
 class _AdminPanelState extends State<AdminPanel> {
   ValueNotifier<double> progressNotifier = ValueNotifier(0);
   bool isUploading = false;
+  final TextEditingController _whatsAppController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+  bool _showWhatsAppSettings = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadWhatsAppNumber();
+  }
+
+  Future<void> _loadWhatsAppNumber() async {
+    final doc = await FirebaseFirestore.instance
+        .collection('settings')
+        .doc('admin')
+        .get();
+
+    if (doc.exists) {
+      _whatsAppController.text = doc['whatsappNumber'] ?? '';
+    }
+  }
+
+  Future<void> _saveWhatsAppNumber() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    final number = _whatsAppController.text.trim();
+    debugPrint("Saving WhatsApp number: $number");
+
+    try{
+      await FirebaseFirestore.instance
+          .collection('settings')
+          .doc('admin')
+          .set(
+        {'whatsappNumber': number},
+        SetOptions(merge: true),
+      );
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("WhatsApp number updated successfully")),
+      );
+    }catch(e){
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Failed to update number: $e")),
+      );
+    }
+  }
+
 
   Future<void> pickAndUploadCSV() async {
     FilePickerResult? result = await FilePicker.platform.pickFiles(
@@ -147,6 +195,96 @@ class _AdminPanelState extends State<AdminPanel> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
+                SwitchListTile(
+                  title: const Text(
+                    "Enable WhatsApp Settings",
+                    style: TextStyle(fontWeight: FontWeight.w600),
+                  ),
+                  subtitle: const Text(
+                    "Turn ON to update admin WhatsApp number",
+                  ),
+                  value: _showWhatsAppSettings,
+                  activeColor: Colors.green,
+                  onChanged: (value) {
+                    setState(() {
+                      _showWhatsAppSettings = value;
+                    });
+                  },
+                ),
+
+                const SizedBox(height: 16),
+
+                Visibility(
+                  visible: _showWhatsAppSettings,
+                  child: Column(
+                    children: [
+                      Form(
+                        key: _formKey,
+                        child: TextFormField(
+                          controller: _whatsAppController,
+                          keyboardType: TextInputType.phone,
+                          maxLength: 10,
+                          inputFormatters: [
+                            FilteringTextInputFormatter.digitsOnly,
+                          ],
+                          decoration: InputDecoration(
+                            labelText: "Admin WhatsApp Number",
+                            hintText: "Enter 10-digit number",
+                            counterText: "",
+                            prefixIcon: const SizedBox(
+                              width: 48,
+                              child: Center(
+                                child: FaIcon(
+                                  FontAwesomeIcons.whatsapp,
+                                  color: Colors.green,
+                                  size: 20,
+                                ),
+                              ),
+                            ),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          validator: (value) {
+                            if (value == null || value.trim().isEmpty) {
+                              return "WhatsApp number is required";
+                            }
+                            if (!RegExp(r'^\d{10}$').hasMatch(value)) {
+                              return "Enter a valid 10-digit number";
+                            }
+                            return null;
+                          },
+                          onFieldSubmitted: (_) => FocusScope.of(context).unfocus(),
+                        ),
+                      ),
+
+                      const SizedBox(height: 12),
+
+                      SizedBox(
+                        width: double.infinity,
+                        height: 45,
+                        child: ElevatedButton(
+                          onPressed: _saveWhatsAppNumber,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.green,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          child: const Text(
+                            "Save WhatsApp Number",
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: 24),
                 const Icon(
                   Icons.admin_panel_settings,
                   size: 60,

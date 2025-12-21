@@ -1,13 +1,17 @@
 import 'dart:io' show Platform;
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:saree_business/image_zoom_gallery.dart';
+import 'dart:html' as html;
+
 import 'package:url_launcher/url_launcher.dart';
 
 class ProductDetailsScreen extends StatefulWidget {
   final Map<String, dynamic> product;
 
-  const ProductDetailsScreen({Key? key, required this.product}) : super(key: key);
+  const ProductDetailsScreen({Key? key, required this.product})
+      : super(key: key);
 
   @override
   _ProductDetailsScreenState createState() => _ProductDetailsScreenState();
@@ -23,10 +27,12 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen>
   double _targetScale = 1.0;
   late AnimationController _animationController;
   late Animation<double> _animation;
+  String? _adminWhatsApp;
 
   @override
   void initState() {
     super.initState();
+    _loadAdminWhatsApp();
     _animationController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 250),
@@ -38,6 +44,10 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen>
     _pageController.dispose();
     _animationController.dispose();
     super.dispose();
+  }
+
+  Future<void> _loadAdminWhatsApp() async {
+    _adminWhatsApp = await _getAdminWhatsAppNumber();
   }
 
   /// 🔹 Animate double-tap zoom
@@ -57,11 +67,27 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen>
     });
   }
 
-  Future<void> _openWhatsApp(BuildContext context, String title, String description, String price, String imageUrl) async {
-    const adminNumber = '9885924146'; //8247025557
+  Future<void> _openWhatsApp(
+      BuildContext context,
+      String title,
+      String description,
+      String price,
+      String imageUrl,
+      ) async {
+    final adminNumber = _adminWhatsApp; // already preloaded
+
+    if (adminNumber == null || adminNumber.isEmpty) {
+      _showWhatsAppError(context);
+      return;
+    }
+
+    final phone =
+    adminNumber.startsWith('91') ? adminNumber : '91$adminNumber';
 
     final message = '''
-Hi, I'm interested in the following product:
+Hi *AKKI LATEST COLLECTIONS*
+
+I'm interested in the following product:
 
 🛍️ Product: *$title*
 
@@ -70,34 +96,46 @@ Hi, I'm interested in the following product:
 💰 Price: *$price*
 
 🖼️ Product Image: $imageUrl
-
-Kindly contact me to proceed with the next steps.
-
-Thank you!''';
+''';
 
     final encodedMessage = Uri.encodeComponent(message);
 
-    final url = 'https://wa.me/$adminNumber?text=$encodedMessage';
-    final uri = Uri.parse(url);
+    final url =
+        'https://api.whatsapp.com/send?phone=$phone&text=$encodedMessage';
 
-    try {
-      final launched = await launchUrl(
-        uri,
+    if (kIsWeb) {
+      // ✅ iOS Safari FIX
+      html.window.open(url, '_blank');
+    } else {
+      // ✅ Android / iOS App
+      await launchUrl(
+        Uri.parse(url),
         mode: LaunchMode.externalApplication,
       );
+    }
+  }
 
-      if (!launched) {
-        _showWhatsAppError(context);
+  Future<String?> _getAdminWhatsAppNumber() async {
+    try {
+      final doc = await FirebaseFirestore.instance
+          .collection('settings')
+          .doc('admin')
+          .get();
+
+      if (doc.exists) {
+        return doc['whatsappNumber'];
       }
     } catch (e) {
-      debugPrint("WhatsApp launch failed: $e");
-      _showWhatsAppError(context);
+      debugPrint("Error fetching WhatsApp number: $e");
     }
+    return null;
   }
 
   void _showWhatsAppError(BuildContext context) {
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Could not open WhatsApp. Please ensure it is installed.')),
+      const SnackBar(
+          content:
+              Text('Could not open WhatsApp. Please ensure it is installed.')),
     );
   }
 
@@ -130,7 +168,7 @@ Thank you!''';
                   return const Center(child: CircularProgressIndicator());
                 },
                 errorBuilder: (_, __, ___) =>
-                const Center(child: Icon(Icons.broken_image, size: 50)),
+                    const Center(child: Icon(Icons.broken_image, size: 50)),
               ),
             ),
           ),
@@ -234,17 +272,20 @@ Thank you!''';
         const SizedBox(height: 16),
         Text('₹ $price',
             style: const TextStyle(
-                fontSize: 20, fontWeight: FontWeight.bold, color: Colors.green)),
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Colors.green)),
         const SizedBox(height: 20),
 
         // 🔹 WhatsApp button
         ElevatedButton.icon(
-          onPressed: () => _openWhatsApp(context, title, description, price, imageUrls[_currentIndex]),
+          onPressed: () => _openWhatsApp(
+              context, title, description, price, imageUrls[_currentIndex]),
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.green,
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
             shape:
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
           ),
           icon: Image.asset(
             'assets/icons/whatsapp.png',
@@ -259,125 +300,128 @@ Thank you!''';
     );
 
     return Scaffold(
-        appBar: AppBar(
-          title: Text(
-            title,
-            style: const TextStyle(
-              color: Colors.white,      // 🔹 Title text color
-              fontSize: 18,             // 🔹 Reduce text size
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          backgroundColor: Colors.deepOrangeAccent,
-          iconTheme: const IconThemeData(
-            color: Colors.white,        // 🔹 Back arrow color
+      appBar: AppBar(
+        title: Text(
+          title,
+          style: const TextStyle(
+            color: Colors.yellowAccent, // 🔹 Title text color
+            fontSize: 18, // 🔹 Reduce text size
+            fontWeight: FontWeight.w600,
           ),
         ),
+        backgroundColor: const Color(0xFF2874F0),
+        elevation: 6,
+        shadowColor: Colors.yellowAccent,
+        iconTheme: const IconThemeData(
+          color: Colors.white, // 🔹 Back arrow color
+        ),
+      ),
       body: isLargeScreen
           ? Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // 🔹 Left side (vertical thumbnails + main image)
-          Expanded(
-            flex: 2,
-            child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildVerticalThumbnails(imageUrls),
-                const SizedBox(width: 12),
+                // 🔹 Left side (vertical thumbnails + main image)
                 Expanded(
-                  child: Column(
+                  flex: 2,
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      SizedBox(
-                        height: 400,
-                        child: PageView.builder(
-                          controller: _pageController,
-                          itemCount: imageUrls.length,
-                          onPageChanged: (index) {
-                            setState(() {
-                              _currentIndex = index;
-                              _scale = 1.0; // Reset zoom on page change
-                            });
-                          },
-                          itemBuilder: (context, index) {
-                            return AnimatedSwitcher(
-                              duration:
-                              const Duration(milliseconds: 400),
-                              transitionBuilder: (child, anim) =>
-                                  FadeTransition(
-                                      opacity: anim, child: child),
-                              //child: _buildMainImage(imageUrls[index]),
-                              child: kIsWeb
-                                  ? _buildMainImage(imageUrls[index]) // For Web (browser or mobile web)
-                                  : ImageZoomGallery(
-                                imageUrls: imageUrls,
-                                initialIndex: index,
-                              ), // For Android/iOS
-                            );
-                          },
+                      _buildVerticalThumbnails(imageUrls),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          children: [
+                            SizedBox(
+                              height: 400,
+                              child: PageView.builder(
+                                controller: _pageController,
+                                itemCount: imageUrls.length,
+                                onPageChanged: (index) {
+                                  setState(() {
+                                    _currentIndex = index;
+                                    _scale = 1.0; // Reset zoom on page change
+                                  });
+                                },
+                                itemBuilder: (context, index) {
+                                  return AnimatedSwitcher(
+                                    duration: const Duration(milliseconds: 400),
+                                    transitionBuilder: (child, anim) =>
+                                        FadeTransition(
+                                            opacity: anim, child: child),
+                                    //child: _buildMainImage(imageUrls[index]),
+                                    child: kIsWeb
+                                        ? _buildMainImage(imageUrls[
+                                            index]) // For Web (browser or mobile web)
+                                        : ImageZoomGallery(
+                                            imageUrls: imageUrls,
+                                            initialIndex: index,
+                                          ), // For Android/iOS
+                                  );
+                                },
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ],
                   ),
                 ),
-              ],
-            ),
-          ),
 
-          // 🔹 Right side (product details + WhatsApp)
-          Expanded(
-            flex: 3,
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
-              child: productDetailsSection,
-            ),
-          ),
-        ],
-      )
+                // 🔹 Right side (product details + WhatsApp)
+                Expanded(
+                  flex: 3,
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.all(16),
+                    child: productDetailsSection,
+                  ),
+                ),
+              ],
+            )
           : SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // 🔹 Main Image
-            SizedBox(
-              height: 500,
-              child: PageView.builder(
-                controller: _pageController,
-                itemCount: imageUrls.length,
-                onPageChanged: (index) {
-                  setState(() {
-                    _currentIndex = index;
-                    _scale = 1.0; // Reset zoom on swipe
-                  });
-                },
-                itemBuilder: (context, index) {
-                  return AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 400),
-                    transitionBuilder: (child, anim) =>
-                        FadeTransition(opacity: anim, child: child),
-                    //child: ImageZoomGallery(imageUrls: imageUrls, initialIndex: index),
-                    child: kIsWeb
-                        ? _buildMainImage(imageUrls[index]) // For Web (browser or mobile web)
-                        : ImageZoomGallery(
-                      imageUrls: imageUrls,
-                      initialIndex: index,
-                    ), // For Android/iOS
-                  );
-                },
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // 🔹 Main Image
+                  SizedBox(
+                    height: 500,
+                    child: PageView.builder(
+                      controller: _pageController,
+                      itemCount: imageUrls.length,
+                      onPageChanged: (index) {
+                        setState(() {
+                          _currentIndex = index;
+                          _scale = 1.0; // Reset zoom on swipe
+                        });
+                      },
+                      itemBuilder: (context, index) {
+                        return AnimatedSwitcher(
+                          duration: const Duration(milliseconds: 400),
+                          transitionBuilder: (child, anim) =>
+                              FadeTransition(opacity: anim, child: child),
+                          //child: ImageZoomGallery(imageUrls: imageUrls, initialIndex: index),
+                          child: kIsWeb
+                              ? _buildMainImage(imageUrls[
+                                  index]) // For Web (browser or mobile web)
+                              : ImageZoomGallery(
+                                  imageUrls: imageUrls,
+                                  initialIndex: index,
+                                ), // For Android/iOS
+                        );
+                      },
+                    ),
+                  ),
+
+                  const SizedBox(height: 5),
+                  _buildHorizontalThumbnails(imageUrls),
+
+                  const SizedBox(height: 16),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    child: productDetailsSection,
+                  ),
+                ],
               ),
             ),
-
-            const SizedBox(height: 5),
-            _buildHorizontalThumbnails(imageUrls),
-
-            const SizedBox(height: 16),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: productDetailsSection,
-            ),
-          ],
-        ),
-      ),
     );
   }
 }

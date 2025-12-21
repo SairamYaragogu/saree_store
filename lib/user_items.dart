@@ -100,29 +100,33 @@ class _UserItemsState extends State<UserItems> with SingleTickerProviderStateMix
       appBar: AppBar(
         automaticallyImplyLeading: false,
         title: RichText(
+          textAlign: TextAlign.center,
           text: TextSpan(
             children: [
               TextSpan(
-                text: "Akki ",
+                text: "Akki\n",
                 style: GoogleFonts.playfairDisplay(
-                  fontSize: 26,
-                  fontWeight: FontWeight.bold,
+                  fontSize: 24,
+                  fontWeight: FontWeight.w800,
                   letterSpacing: 1.5,
-                  color: Colors.white,
+                  color: Colors.yellowAccent,
                 ),
               ),
               TextSpan(
-                text: "Latest Collections",
+                text: "LATEST COLLECTIONS",
                 style: GoogleFonts.poppins(
-                  fontSize: 22,
-                  fontWeight: FontWeight.w500,
-                  color: Colors.black87,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white,
                 ),
               ),
             ],
           ),
         ),
         centerTitle: MediaQuery.of(context).size.width > 600,
+        backgroundColor: const Color(0xFF2874F0),
+        elevation: 6,
+        shadowColor: Colors.yellowAccent,
         actions: [
           TextButton(
             onPressed: () {
@@ -134,7 +138,7 @@ class _UserItemsState extends State<UserItems> with SingleTickerProviderStateMix
             child: const Text(
               'Admin Login',
               style: TextStyle(
-                color: Colors.white,
+                color: Colors.yellowAccent,
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -143,6 +147,7 @@ class _UserItemsState extends State<UserItems> with SingleTickerProviderStateMix
       ),
       body: Column(
         children: [
+          const SizedBox(height: 5),
           // 🔹 Category Chips with Auto-Hiding Clear Filter
           Container(
             height: 60,
