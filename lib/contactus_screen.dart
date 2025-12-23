@@ -63,7 +63,7 @@ class _ContactUsScreenState extends State<ContactUsScreen> {
     final phone =
     adminNumber.startsWith('91') ? adminNumber : '91$adminNumber';
 
-    final encodedMessage = Uri.encodeComponent(AppStrings.contactUsMessage);
+    final encodedMessage = Uri.encodeComponent(AppStrings.CONTACTUS_AKKI);
 
     final url =
         'https://api.whatsapp.com/send?phone=$phone&text=$encodedMessage';
@@ -178,9 +178,9 @@ class _ContactUsScreenState extends State<ContactUsScreen> {
                 icon: Icons.email_outlined,
                 iconColor: Colors.redAccent,
                 title: "Email",
-                subtitle: "akkilatestcollections@gmail.com",
+                subtitle: AppStrings.EMAIL_AKKI,
                 onTap: () => _launchUrl(
-                  "mailto:akkilatestcollections@gmail.com",
+                  "mailto:${AppStrings.EMAIL_AKKI}?subject=${Uri.encodeComponent("Inquiry from Akki Latest Collections App")}&body=${Uri.encodeComponent(AppStrings.CONTACTUS_AKKI)}",
                 ),
               ),
 

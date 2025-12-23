@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:saree_business/user_items.dart';
+import 'package:saree_business/utils/app_strings.dart';
 import 'admin_panel.dart';
 
 class AdminLogin extends StatefulWidget {
@@ -15,7 +16,7 @@ class _AdminLoginState extends State<AdminLogin> {
     final username = usernameController.text.trim();
     final password = passwordController.text.trim();
 
-    if (username == 'admin' && password == 'admin123') {
+    if (username == AppStrings.EMAIL_AKKI && password == AppStrings.EMAIL_PWD) {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (_) => AdminPanel()),

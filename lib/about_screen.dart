@@ -59,7 +59,7 @@ class AboutScreen extends StatelessWidget {
 
               // 🔷 About content
               Text(
-                AppStrings.aboutAkki,
+                AppStrings.ABOUT_AKKI,
                 textAlign: TextAlign.justify,
                 style: GoogleFonts.poppins(
                   fontSize: 15,

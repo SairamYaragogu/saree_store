@@ -1,5 +1,10 @@
 class AppStrings {
-  static const String aboutAkki =
+
+  static const String EMAIL_AKKI = "nallamrevathi@gmail.com";
+
+  static const String EMAIL_PWD = "Reva@Pandu.4";
+
+  static const String ABOUT_AKKI =
   '''
 Akki Latest Collections is a trusted destination for timeless elegance and contemporary ethnic fashion. Rooted in tradition and inspired by modern trends, we bring you a carefully curated range of sarees and dress materials that celebrate the beauty, grace, and individuality of every woman.
 
@@ -22,8 +27,8 @@ With a growing customer base and a passion for excellence, Akki Latest Collectio
 ✨ Discover style. Embrace tradition. Celebrate elegance with Akki Latest Collections.
   ''';
 
-  static const String contactUsMessage =
-      '''
+  static const String CONTACTUS_AKKI =
+  '''
   Hi *AKKI LATEST COLLECTIONS* 👋
 
   I would like to get in touch with you regarding your collections.
