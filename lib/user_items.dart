@@ -98,7 +98,7 @@ class _UserItemsState extends State<UserItems> with SingleTickerProviderStateMix
 
     return Scaffold(
       appBar: AppBar(
-        automaticallyImplyLeading: false,
+        automaticallyImplyLeading: true,
         title: RichText(
           textAlign: TextAlign.center,
           text: TextSpan(
@@ -115,7 +115,7 @@ class _UserItemsState extends State<UserItems> with SingleTickerProviderStateMix
               TextSpan(
                 text: "LATEST COLLECTIONS",
                 style: GoogleFonts.poppins(
-                  fontSize: 18,
+                  fontSize: 16,
                   fontWeight: FontWeight.w600,
                   color: Colors.white,
                 ),
@@ -145,6 +145,7 @@ class _UserItemsState extends State<UserItems> with SingleTickerProviderStateMix
           ),
         ],
       ),
+      drawer: _buildAkkiDrawer(context),
       body: Column(
         children: [
           const SizedBox(height: 5),
@@ -416,4 +417,61 @@ class _UserItemsState extends State<UserItems> with SingleTickerProviderStateMix
       ),
     );
   }
+  Widget _buildAkkiDrawer(BuildContext context) {
+    return Drawer(
+      child: Column(
+        children: [
+          // 🔶 Header Image
+          DrawerHeader(
+            margin: EdgeInsets.zero,
+            padding: EdgeInsets.zero,
+            decoration: const BoxDecoration(
+              color: Color(0xFF7A1E24), // fallback color
+            ),
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                Image.asset(
+                  'assets/icons/logo_akki_latest_collections.jpeg',
+                  fit: BoxFit.cover,
+                ),
+              ],
+            ),
+          ),
+
+          // 🔹 About
+          ListTile(
+            leading: const Icon(Icons.info_outline),
+            title: const Text("About Akki"),
+            onTap: () {
+              Navigator.pop(context);
+              Navigator.pushNamed(context, '/about');
+            },
+          ),
+
+          // 🔹 Contact Us
+          ListTile(
+            leading: const Icon(Icons.call_outlined),
+            title: const Text("Contact Us"),
+            onTap: () {
+              Navigator.pop(context);
+              Navigator.pushNamed(context, '/contact');
+            },
+          ),
+
+          const Spacer(),
+
+          // 🔹 Footer
+          const Padding(
+            padding: EdgeInsets.all(12),
+            child: Text(
+              "© Akki Latest Collections",
+              style: TextStyle(fontSize: 12, color: Colors.grey),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
 }

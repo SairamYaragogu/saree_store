@@ -5,7 +5,9 @@ import 'package:saree_business/splash_screen.dart';
 import 'package:saree_business/user_items.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import 'about_screen.dart';
 import 'admin_panel.dart';
+import 'contactus_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -40,6 +42,8 @@ class MyApp extends StatelessWidget {
       routes: {
         '/': (context) => SplashScreen(),
         '/home': (context) => UserItems(),
+        '/about': (context) => const AboutScreen(),
+        '/contact': (context) => const ContactUsScreen(),
       },
     );
   }
